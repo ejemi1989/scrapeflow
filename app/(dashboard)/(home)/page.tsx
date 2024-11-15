@@ -1,3 +1,4 @@
+// app/(dashboard)/(home)/page.tsx
 import { GetCreditUsageInPeriod } from "@/actions/analytics/getCreditUsageInperiod";
 import { GetPeriods } from "@/actions/analytics/getPeriods";
 import { GetStatsCardsValues } from "@/actions/analytics/getStatsCardsValues";
@@ -12,11 +13,15 @@ import { Period } from "@/types/analytics";
 import { CirclePlayIcon, CoinsIcon, WaypointsIcon } from "lucide-react";
 import React, { Suspense } from "react";
 
-async function HomePage({
-  searchParams,
-}: {
-  searchParams: { month?: string; year?: string };
-}) {
+// Define a custom type for the props
+interface CustomPageProps {
+  searchParams: {
+    month?: string;
+    year?: string;
+  };
+}
+
+async function HomePage({ searchParams }: CustomPageProps) {
   const currentDate = new Date();
   const { month, year } = searchParams;
   const period: Period = {
