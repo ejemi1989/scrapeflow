@@ -7,21 +7,20 @@ import PeriodSelector from "@/app/(dashboard)/(home)/_components/PeriodSelector"
 import StatsCard from "@/app/(dashboard)/(home)/_components/StatsCard";
 import CreditUsageChart from "@/app/(dashboard)/billing/_components/CreditUsageChart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { waitFor } from "@/lib/helper/waitFor";
 import { Period } from "@/types/analytics";
 import { CirclePlayIcon, CoinsIcon, WaypointsIcon } from "lucide-react";
 import React, { Suspense } from "react";
 
-interface HomePageProps {
-  searchParams: {
-    month?: string;
-    year?: string;
-  };
-}
+type PageProps = {
+  params: { [key: string]: string | string[] | undefined };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-export default async function HomePage({ searchParams }: HomePageProps) {
+export default async function HomePage({ searchParams }: PageProps) {
   const currentDate = new Date();
-  const { month, year } = searchParams;
+  const month = typeof searchParams.month === 'string' ? searchParams.month : undefined;
+  const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
+  
   const period: Period = {
     month: month ? parseInt(month) : currentDate.getMonth(),
     year: year ? parseInt(year) : currentDate.getFullYear(),
