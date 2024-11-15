@@ -13,17 +13,17 @@ import { Period } from "@/types/analytics";
 import { CirclePlayIcon, CoinsIcon, WaypointsIcon } from "lucide-react";
 import React, { Suspense } from "react";
 
-// Define a custom type for the props
-interface CustomPageProps {
-  searchParams: {
+// Define the expected PageProps type
+interface PageProps {
+  searchParams: Promise<{
     month?: string;
     year?: string;
-  };
+  }>;
 }
 
-async function HomePage({ searchParams }: CustomPageProps) {
+async function HomePage({ searchParams }: PageProps) {
   const currentDate = new Date();
-  const { month, year } = searchParams;
+  const { month, year } = await searchParams; // Await the promise
   const period: Period = {
     month: month ? parseInt(month) : currentDate.getMonth(),
     year: year ? parseInt(year) : currentDate.getFullYear(),
