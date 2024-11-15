@@ -1,4 +1,3 @@
-// app/(dashboard)/(home)/page.tsx
 import { GetCreditUsageInPeriod } from "@/actions/analytics/getCreditUsageInperiod";
 import { GetPeriods } from "@/actions/analytics/getPeriods";
 import { GetStatsCardsValues } from "@/actions/analytics/getStatsCardsValues";
@@ -13,21 +12,21 @@ import { Period } from "@/types/analytics";
 import { CirclePlayIcon, CoinsIcon, WaypointsIcon } from "lucide-react";
 import React, { Suspense } from "react";
 
-// Define the expected PageProps type
-interface PageProps {
-  searchParams: Promise<{
+interface HomePageProps {
+  searchParams: {
     month?: string;
     year?: string;
-  }>;
+  };
 }
 
-async function HomePage({ searchParams }: PageProps) {
+export default async function HomePage({ searchParams }: HomePageProps) {
   const currentDate = new Date();
-  const { month, year } = await searchParams; // Await the promise
+  const { month, year } = searchParams;
   const period: Period = {
     month: month ? parseInt(month) : currentDate.getMonth(),
     year: year ? parseInt(year) : currentDate.getFullYear(),
   };
+  
   return (
     <div className="flex flex-1 flex-col h-full">
       <div className="flex justify-between">
@@ -51,16 +50,16 @@ async function HomePage({ searchParams }: PageProps) {
   );
 }
 
-async function PeriodSelectorWrapper({
-  selectedPeriod,
-}: {
+interface PeriodProps {
   selectedPeriod: Period;
-}) {
+}
+
+async function PeriodSelectorWrapper({ selectedPeriod }: PeriodProps) {
   const periods = await GetPeriods();
   return <PeriodSelector selectedPeriod={selectedPeriod} periods={periods} />;
 }
 
-async function StatsCards({ selectedPeriod }: { selectedPeriod: Period }) {
+async function StatsCards({ selectedPeriod }: PeriodProps) {
   const data = await GetStatsCardsValues(selectedPeriod);
   return (
     <div className="grid gap-3 lg:gap-8 lg:grid-cols-3 min-h-[120px]">
@@ -93,20 +92,12 @@ function StatsCardSkeleton() {
   );
 }
 
-async function StatsExecutionStatus({
-  selectedPeriod,
-}: {
-  selectedPeriod: Period;
-}) {
+async function StatsExecutionStatus({ selectedPeriod }: PeriodProps) {
   const data = await GetWorkflowExecutionStats(selectedPeriod);
   return <ExecutionStatusChart data={data} />;
 }
 
-async function CreditsUsageInPeriod({
-  selectedPeriod,
-}: {
-  selectedPeriod: Period;
-}) {
+async function CreditsUsageInPeriod({ selectedPeriod }: PeriodProps) {
   const data = await GetCreditUsageInPeriod(selectedPeriod);
   return (
     <CreditUsageChart
@@ -116,5 +107,3 @@ async function CreditsUsageInPeriod({
     />
   );
 }
-
-export default HomePage;
