@@ -10,18 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Period } from "@/types/analytics";
 import { Suspense } from "react";
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export default function Page() {
   const currentDate = new Date();
-  const month = typeof searchParams.month === 'string' ? searchParams.month : undefined;
-  const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
-  
   const period: Period = {
-    month: month ? parseInt(month) : currentDate.getMonth(),
-    year: year ? parseInt(year) : currentDate.getFullYear(),
+    month: currentDate.getMonth(),
+    year: currentDate.getFullYear(),
   };
 
   return (
@@ -71,3 +64,4 @@ async function CreditUsageWrapper({ selectedPeriod }: { selectedPeriod: Period }
       description="Daily credit consumed in selected period"
     />
   );
+}
