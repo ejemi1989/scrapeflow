@@ -7,16 +7,18 @@ import PeriodSelector from "@/app/(dashboard)/(home)/_components/PeriodSelector"
 import StatsCard from "@/app/(dashboard)/(home)/_components/StatsCard";
 import CreditUsageChart from "@/app/(dashboard)/billing/_components/CreditUsageChart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { waitFor } from "@/lib/helper/waitFor";
 import { Period } from "@/types/analytics";
 import { CirclePlayIcon, CoinsIcon, WaypointsIcon } from "lucide-react";
 import React, { Suspense } from "react";
 
+// Add Next.js specific types
 type PageProps = {
-  params: { [key: string]: string | string[] | undefined };
+  params: Record<string, string>;
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export default async function HomePage({ searchParams }: PageProps) {
+export default function HomePage({ searchParams }: PageProps) {
   const currentDate = new Date();
   const month = typeof searchParams.month === 'string' ? searchParams.month : undefined;
   const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
@@ -25,7 +27,7 @@ export default async function HomePage({ searchParams }: PageProps) {
     month: month ? parseInt(month) : currentDate.getMonth(),
     year: year ? parseInt(year) : currentDate.getFullYear(),
   };
-  
+
   return (
     <div className="flex flex-1 flex-col h-full">
       <div className="flex justify-between">
@@ -49,16 +51,16 @@ export default async function HomePage({ searchParams }: PageProps) {
   );
 }
 
-interface PeriodProps {
+async function PeriodSelectorWrapper({
+  selectedPeriod,
+}: {
   selectedPeriod: Period;
-}
-
-async function PeriodSelectorWrapper({ selectedPeriod }: PeriodProps) {
+}) {
   const periods = await GetPeriods();
   return <PeriodSelector selectedPeriod={selectedPeriod} periods={periods} />;
 }
 
-async function StatsCards({ selectedPeriod }: PeriodProps) {
+async function StatsCards({ selectedPeriod }: { selectedPeriod: Period }) {
   const data = await GetStatsCardsValues(selectedPeriod);
   return (
     <div className="grid gap-3 lg:gap-8 lg:grid-cols-3 min-h-[120px]">
@@ -91,12 +93,20 @@ function StatsCardSkeleton() {
   );
 }
 
-async function StatsExecutionStatus({ selectedPeriod }: PeriodProps) {
+async function StatsExecutionStatus({
+  selectedPeriod,
+}: {
+  selectedPeriod: Period;
+}) {
   const data = await GetWorkflowExecutionStats(selectedPeriod);
   return <ExecutionStatusChart data={data} />;
 }
 
-async function CreditsUsageInPeriod({ selectedPeriod }: PeriodProps) {
+async function CreditsUsageInPeriod({
+  selectedPeriod,
+}: {
+  selectedPeriod: Period;
+}) {
   const data = await GetCreditUsageInPeriod(selectedPeriod);
   return (
     <CreditUsageChart
