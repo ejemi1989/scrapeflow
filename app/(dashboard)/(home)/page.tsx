@@ -2,27 +2,24 @@ import { GetCreditUsageInPeriod } from "@/actions/analytics/getCreditUsageInperi
 import { GetPeriods } from "@/actions/analytics/getPeriods";
 import { GetStatsCardsValues } from "@/actions/analytics/getStatsCardsValues";
 import { GetWorkflowExecutionStats } from "@/actions/analytics/getWorkflowExecutionStats";
-import ExecutionStatusChart from "@/app/(dashboard)/(home)/_components/ExecutionStatusChart";
-import PeriodSelector from "@/app/(dashboard)/(home)/_components/PeriodSelector";
-import StatsCard from "@/app/(dashboard)/(home)/_components/StatsCard";
-import CreditUsageChart from "@/app/(dashboard)/billing/_components/CreditUsageChart";
+import { StatsCards, StatsCardSkeleton } from "@/components/home/StatsCards";
+import { PeriodSelector } from "@/components/home/PeriodSelector";
+import { ExecutionStatusChart } from "@/components/home/ExecutionStatusChart";
+import { CreditUsageChart } from "@/components/billing/CreditUsageChart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { waitFor } from "@/lib/helper/waitFor";
 import { Period } from "@/types/analytics";
-import { CirclePlayIcon, CoinsIcon, WaypointsIcon } from "lucide-react";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
-// For Next.js 13+ App Router
-interface PageProps {
-  params: { [key: string]: string | string[] | undefined };
-  searchParams: { [key: string]: string | string[] | undefined };
+interface HomePageProps {
+  searchParams: {
+    month?: string;
+    year?: string;
+  };
 }
 
-export default async function Page({ searchParams }: PageProps) {
+export default async function HomePage({ searchParams }: HomePageProps) {
   const currentDate = new Date();
-  const month = typeof searchParams.month === 'string' ? searchParams.month : undefined;
-  const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
-  
+  const { month, year } = searchParams;
   const period: Period = {
     month: month ? parseInt(month) : currentDate.getMonth(),
     year: year ? parseInt(year) : currentDate.getFullYear(),
@@ -38,75 +35,35 @@ export default async function Page({ searchParams }: PageProps) {
       </div>
       <div className="h-full py-6 flex flex-col gap-4">
         <Suspense fallback={<StatsCardSkeleton />}>
-          <StatsCards selectedPeriod={period} />
+          <StatsCardsWrapper selectedPeriod={period} />
         </Suspense>
         <Suspense fallback={<Skeleton className="w-full h-[300px]" />}>
-          <StatsExecutionStatus selectedPeriod={period} />
+          <ExecutionStatsWrapper selectedPeriod={period} />
         </Suspense>
         <Suspense fallback={<Skeleton className="w-full h-[300px]" />}>
-          <CreditsUsageInPeriod selectedPeriod={period} />
+          <CreditUsageWrapper selectedPeriod={period} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-async function PeriodSelectorWrapper({
-  selectedPeriod,
-}: {
-  selectedPeriod: Period;
-}) {
+async function PeriodSelectorWrapper({ selectedPeriod }: { selectedPeriod: Period }) {
   const periods = await GetPeriods();
   return <PeriodSelector selectedPeriod={selectedPeriod} periods={periods} />;
 }
 
-async function StatsCards({ selectedPeriod }: { selectedPeriod: Period }) {
+async function StatsCardsWrapper({ selectedPeriod }: { selectedPeriod: Period }) {
   const data = await GetStatsCardsValues(selectedPeriod);
-  return (
-    <div className="grid gap-3 lg:gap-8 lg:grid-cols-3 min-h-[120px]">
-      <StatsCard
-        title="Workflow executions"
-        value={data.workflowExecutions}
-        icon={CirclePlayIcon}
-      />
-      <StatsCard
-        title="Phase executions"
-        value={data.phaseExecutions}
-        icon={WaypointsIcon}
-      />
-      <StatsCard
-        title="Credits consumed"
-        value={data.creditsConsumed}
-        icon={CoinsIcon}
-      />
-    </div>
-  );
+  return <StatsCards data={data} />;
 }
 
-function StatsCardSkeleton() {
-  return (
-    <div className="grid gap-3 lg:gap-8 lg:grid-cols-3">
-      {[1, 2, 3].map((i) => (
-        <Skeleton key={i} className="w-full min-h-[120px]" />
-      ))}
-    </div>
-  );
-}
-
-async function StatsExecutionStatus({
-  selectedPeriod,
-}: {
-  selectedPeriod: Period;
-}) {
+async function ExecutionStatsWrapper({ selectedPeriod }: { selectedPeriod: Period }) {
   const data = await GetWorkflowExecutionStats(selectedPeriod);
   return <ExecutionStatusChart data={data} />;
 }
 
-async function CreditsUsageInPeriod({
-  selectedPeriod,
-}: {
-  selectedPeriod: Period;
-}) {
+async function CreditUsageWrapper({ selectedPeriod }: { selectedPeriod: Period }) {
   const data = await GetCreditUsageInPeriod(selectedPeriod);
   return (
     <CreditUsageChart
