@@ -12,13 +12,13 @@ import { Period } from "@/types/analytics";
 import { CirclePlayIcon, CoinsIcon, WaypointsIcon } from "lucide-react";
 import React, { Suspense } from "react";
 
-// Add Next.js specific types
-type PageProps = {
-  params: Record<string, string>;
+// For Next.js 13+ App Router
+interface PageProps {
+  params: { [key: string]: string | string[] | undefined };
   searchParams: { [key: string]: string | string[] | undefined };
-};
+}
 
-export default function HomePage({ searchParams }: PageProps) {
+export default async function Page({ searchParams }: PageProps) {
   const currentDate = new Date();
   const month = typeof searchParams.month === 'string' ? searchParams.month : undefined;
   const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
